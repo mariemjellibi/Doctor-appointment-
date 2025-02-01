@@ -1,64 +1,63 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { loginUser, registerUser } from "../redux/actions/authActions"; // Import the correct thunk actions
+import { loginUser, registerUser } from "../redux/actions/authActions";
+import { useForm } from "react-hook-form";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(false); // Toggle between Sign Up and Login
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    phone: "",
-    cpassword: "",
-  });
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Handling form field changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm();
 
-  // Form submission logic
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const onSubmit = async (data) => {
     try {
       let response;
 
       if (isLogin) {
         // Login logic
-        response = await dispatch(loginUser(formData.email, formData.password));
+        response = await dispatch(loginUser(data.email, data.password));
+        console.log(response);
+
         if (response?.payload?._id) {
           const userId = response.payload._id;
-          navigate(`/profile/${userId}`); // Redirect to profile page after login
+          if (response.payload.isDoctor) {
+            navigate(`/doctor/`);
+          } else {
+            navigate(`/profile/${userId}`);
+          }
         } else {
           console.error("Login failed: User ID not found.");
         }
       } else {
         // Registration logic
-        if (formData.password !== formData.cpassword) {
-          alert("Passwords do not match!");
+        if (data.password !== data.cpassword) {
+          setError("cpassword", {
+            type: "manual",
+            message: "Passwords do not match!",
+          });
           return;
         }
 
-        const response = await dispatch(
+        response = await dispatch(
           registerUser(
-            formData.firstName,
-            formData.lastName,
-            formData.email,
-            formData.phone,
-            formData.password
+            data.firstName,
+            data.lastName,
+            data.email,
+            data.phone,
+            data.password
           )
         );
-
-        if (response?.payload?._id) {
-          const userId = response.payload._id;
-          navigate(`/profile/${userId}`); // Redirect to profile page after registration
+        console.log("response", response);
+        if (response?._id) {
+          const userId = response._id;
+          navigate(`/profile/${userId}`);
         } else {
           console.error("Registration failed: User ID not found.");
         }
@@ -69,47 +68,49 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-8 font-sans bg-gradient-to-r from-[#e0e7ff] via-[#f4f4ff] to-white shadow-lg rounded-lg">
+    <div className="max-w-lg mx-auto p-8 bg-gradient-to-r from-[#FBFBFB] via-[#E8F9FF] to-[#C4D9FF] shadow-lg rounded-lg">
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-semibold text-blue-600">
+        <h1 className="text-3xl font-semibold text-[#C5BAFF]">
           {isLogin ? "Log In" : "Sign Up"}
         </h1>
         <p className="text-sm text-gray-500 mt-2">
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-blue-500 hover:text-blue-700 font-semibold"
+            className="text-[#C5BAFF] hover:text-[#C4D9FF] font-semibold"
           >
             {isLogin ? "Sign Up" : "Log In"}
           </button>
         </p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         {/* Conditional Form Fields */}
         {isLogin ? (
           <div className="space-y-4">
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Email</label>
               <input
-                name="email"
+                {...register("email", { required: "Email is required" })}
                 type="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
                 placeholder="Enter your email"
               />
+              {errors.email && (
+                <span className="text-red-500 text-sm">{errors.email.message}</span>
+              )}
             </div>
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Password</label>
               <input
-                name="password"
+                {...register("password", { required: "Password is required" })}
                 type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
                 placeholder="Enter your password"
               />
+              {errors.password && (
+                <span className="text-red-500 text-sm">{errors.password.message}</span>
+              )}
             </div>
           </div>
         ) : (
@@ -117,68 +118,74 @@ const LoginPage = () => {
             <div>
               <label className="text-gray-700 text-sm mb-2 block">First Name</label>
               <input
-                name="firstName"
+                {...register("firstName", { required: "First Name is required" })}
                 type="text"
-                value={formData.firstName}
-                onChange={handleChange}
-                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
                 placeholder="Enter first name"
               />
+              {errors.firstName && (
+                <span className="text-red-500 text-sm">{errors.firstName.message}</span>
+              )}
             </div>
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Last Name</label>
               <input
-                name="lastName"
+                {...register("lastName", { required: "Last Name is required" })}
                 type="text"
-                value={formData.lastName}
-                onChange={handleChange}
-                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
                 placeholder="Enter last name"
               />
+              {errors.lastName && (
+                <span className="text-red-500 text-sm">{errors.lastName.message}</span>
+              )}
             </div>
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Email</label>
               <input
-                name="email"
+                {...register("email", { required: "Email is required" })}
                 type="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
                 placeholder="Enter email"
               />
+              {errors.email && (
+                <span className="text-red-500 text-sm">{errors.email.message}</span>
+              )}
             </div>
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Phone</label>
               <input
-                name="phone"
+                {...register("phone", { required: "Phone is required" })}
                 type="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
                 placeholder="Enter mobile number"
               />
+              {errors.phone && (
+                <span className="text-red-500 text-sm">{errors.phone.message}</span>
+              )}
             </div>
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Password</label>
               <input
-                name="password"
+                {...register("password", { required: "Password is required" })}
                 type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
                 placeholder="Enter password"
               />
+              {errors.password && (
+                <span className="text-red-500 text-sm">{errors.password.message}</span>
+              )}
             </div>
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Confirm Password</label>
               <input
-                name="cpassword"
+                {...register("cpassword", { required: "Confirm Password is required" })}
                 type="password"
-                value={formData.cpassword}
-                onChange={handleChange}
-                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
                 placeholder="Confirm password"
               />
+              {errors.cpassword && (
+                <span className="text-red-500 text-sm">{errors.cpassword.message}</span>
+              )}
             </div>
           </div>
         )}
@@ -187,7 +194,7 @@ const LoginPage = () => {
         <div className="mt-6 text-center">
           <button
             type="submit"
-            className="w-full py-3 px-6 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="w-full py-3 px-6 bg-[#C5BAFF] text-white text-sm font-semibold rounded-lg hover:bg-[#C4D9FF] focus:outline-none focus:ring-2 focus:ring-[#C5BAFF] transition-all"
           >
             {isLogin ? "Log In" : "Sign Up"}
           </button>

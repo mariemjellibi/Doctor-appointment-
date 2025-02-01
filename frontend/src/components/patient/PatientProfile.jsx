@@ -1,13 +1,33 @@
-import { useState } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { updateProfile } from '../../redux/actions/authActions';
+import { useState, useEffect } from "react";
 
 const PatientProfile = () => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user); // Get the logged-in user from Redux
+
+  // State for storing patient info
   const [patientInfo, setPatientInfo] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john@example.com',
-    phone: '123-456-7890',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: '',
   });
 
+  // Use useEffect to set user info once it's available
+  useEffect(() => {
+    if (user) {
+      setPatientInfo({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      });
+    }
+  }, [user]);
+
+  // Handle input changes
   const handleChange = (e) => {
     setPatientInfo({
       ...patientInfo,
@@ -15,9 +35,17 @@ const PatientProfile = () => {
     });
   };
 
-  const handleSave = () => {
-    // Logic to save the updated profile
-    console.log('Updated patient info:', patientInfo);
+  // Save updated profile
+  const handleSave = async () => {
+    try {
+      // Dispatch updateProfile and handle the result
+      const updatedData = await dispatch(updateProfile(patientInfo));
+      alert("Profile updated successfully");
+      console.log("Updated User Data:", updatedData);
+    } catch (error) {
+      alert("Failed to update profile");
+      console.error("Error updating profile:", error);
+    }
   };
 
   return (
@@ -63,6 +91,16 @@ const PatientProfile = () => {
             type="text"
             name="phone"
             value={patientInfo.phone}
+            onChange={handleChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Password</label>
+          <input
+            type="text"
+            name="password"
+            value={patientInfo.password}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />

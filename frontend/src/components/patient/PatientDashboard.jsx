@@ -1,8 +1,63 @@
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUserAppointments } from "/src/redux/actions/appointmentActions";
+import { CalendarDays, Clock, CheckCircle, XCircle } from "lucide-react";
 
 const PatientDashboard = () => {
-  return (
-    <div>PatientDashboard</div>
-  )
-}
+  const dispatch = useDispatch();
+  const appointments = useSelector((state) => state.appointment.userAppointments || []);
 
-export default PatientDashboard
+  useEffect(() => {
+    dispatch(fetchUserAppointments());
+  }, [dispatch]);
+
+  return (
+    <div className="max-w-3xl mx-auto p-6">
+      <h2 className="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-6">
+        Your Appointments
+      </h2>
+      
+      <div className="space-y-4">
+        {appointments.length === 0 ? (
+          <p className="text-gray-600 dark:text-gray-300 text-center">
+            No appointments found.
+          </p>
+        ) : (
+          appointments.map((appointment) => (
+            <div
+              key={appointment._id}
+              className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-5 flex items-center justify-between border border-gray-200 dark:border-gray-700"
+            >
+              <div>
+                <p className="flex items-center text-gray-700 dark:text-gray-300">
+                  <CalendarDays className="w-5 h-5 mr-2 text-blue-500" />
+                  {appointment.date}
+                </p>
+                <p className="flex items-center text-gray-700 dark:text-gray-300">
+                  <Clock className="w-5 h-5 mr-2 text-green-500" />
+                  {appointment.hour}
+                </p>
+              </div>
+
+              <div className="flex items-center">
+                {appointment.status === "Confirmed" ? (
+                  <CheckCircle className="w-6 h-6 text-green-500" />
+                ) : (
+                  <XCircle className="w-6 h-6 text-red-500" />
+                )}
+                <span className="ml-2 text-gray-700 dark:text-gray-300">
+                  {appointment.status}
+                </span>
+                <span className="ml-2 text-gray-700 dark:text-gray-300">
+                  {appointment.description}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PatientDashboard;

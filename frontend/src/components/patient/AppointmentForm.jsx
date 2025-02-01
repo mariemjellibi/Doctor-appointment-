@@ -1,6 +1,9 @@
 import { useState } from "react";
-
+import { useDispatch } from "react-redux";
+import {createAppointment} from "/src/redux/actions/appointmentActions"
 const AppointmentForm = () => {
+
+  const dispatch = useDispatch(); 
   const [formData, setFormData] = useState({
     date: "",
     hour: "",
@@ -16,11 +19,25 @@ const AppointmentForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Appointment Data:", formData);
-    // You can add your logic here to send the data to the backend
+    
+    try {
+      await dispatch(createAppointment(formData))
+      .then(()=>alert("Appointment created successfully")); // ✅ Dispatch the action
+      console.log("Appointment created successfully");
+      setFormData({
+        date: "",
+        hour: "",
+        status: true,
+        description: "",
+      });
+    } catch (error) {
+      console.error("Error creating appointment:", error);
+    }
   };
+
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
