@@ -10,6 +10,6 @@ import checkDoctor from "../middlewars/checkDoctor.js";
 const router = express.Router();
 router.post("/create", protectRoute, createAppointment);
 router.get("/all", protectRoute, checkDoctor, getAllAppointments);
-router.get("/patient/appointments", protectRoute, getPatientAppointments);
+router.get("/patient/allappointments", protectRoute, getPatientAppointments);
 router.put("/:appointmentId", protectRoute, updateAppointment);
 export default router;

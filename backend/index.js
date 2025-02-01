@@ -6,12 +6,17 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 dotenv.config();
+const corsOptions = {
+  origin: 'http://localhost:5174', // Your frontend URL
+  credentials: true, // Allow cookies to be sent with requests
 
+};
 const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
+
 app.use(cookieParser()); //to parse cookies in the req object
 
 // Set the port

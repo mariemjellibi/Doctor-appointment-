@@ -32,7 +32,7 @@ export const signupUser = async (req, res) => {
 
     // Generate token and set cookie
     try {
-      generateTokenAndSetCookie(newUser._id, res);
+     const token= generateTokenAndSetCookie(newUser._id, res);
       console.log("Token generated and cookie set successfully.");
     } catch (tokenError) {
       console.error("Error in token generation:", tokenError.message);
@@ -49,6 +49,7 @@ export const signupUser = async (req, res) => {
       lastName: newUser.lastName,
       phone: newUser.phone,
       isDoctor: newUser.isDoctor,
+      token: token,
     });
   } catch (error) {
     console.error("Erreur lors de l'inscription de l'utilisateur :", error.message);
@@ -81,7 +82,7 @@ export const loginUser = async (req, res) => {
         }
 
         // Génération du token JWT
-        generateTokenAndSetCookie(user._id, res);  // Cette fonction génère un token et le place dans le cookie
+       const token= generateTokenAndSetCookie(user._id, res);  // Cette fonction génère un token et le place dans le cookie
 
         // Envoi de la réponse avec les informations de l'utilisateur
         res.status(200).json({
@@ -90,6 +91,8 @@ export const loginUser = async (req, res) => {
             firstName: user.firstName,
             lastName: user.lastName,
             phone: user.phone,
+            isDoctor: user.isDoctor,
+            token: token,
         });
 
     } catch (e) {
@@ -110,33 +113,37 @@ export const loginUser = async (req, res) => {
 // 
 
 export const updateUser = async (req, res) => {
-    const { name, username, email, password, profilePic, bio } = req.body;
-    const userId = req.user._id;
+  const { firstName, lastName, email, phone, password, isDoctor } = req.body;
+  //console.log("Request Body:", req.body);
+  const userId = req.user._id;
 
-    try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "Utilisateur non trouvé" });
-        }
-
-        // Si on veut mettre à jour le mot de passe
-        if (password) {
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-            user.password = hashedPassword;
-        }
-
-        // Mise à jour des autres champs
-        user.name = name || user.name;
-        user.username = username || user.username;
-        user.email = email || user.email;
-        user.profilePic = profilePic || user.profilePic;
-        user.bio = bio || user.bio;
-
-        await user.save();
-        res.status(200).json({ message: "Utilisateur mis à jour avec succès" });
-    } catch (e) {
-        res.status(500).json({ message: e.message });
-        console.log("Erreur lors de la mise à jour de l'utilisateur :", e.message);
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
+
+    // Update the password if provided
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      user.password = hashedPassword;
+    }
+
+    // Update other fields only if they are provided
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) user.email = email;
+    if (phone) user.phone = phone;
+    if (isDoctor !== undefined) user.isDoctor = isDoctor;
+
+    // Save the updated user to the database
+    await user.save();
+
+   // console.log("Updated User:", user);
+    res.status(200).json({ message: "Utilisateur mis à jour avec succès", user });
+  } catch (e) {
+    console.error("Erreur lors de la mise à jour de l'utilisateur :", e.message);
+    res.status(500).json({ message: e.message });
+  }
 };

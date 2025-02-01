@@ -1,6 +1,7 @@
 import Appointment from "../models/Appointment.js";
 import User from "../models/User.js";
 import mongoose from "mongoose";
+
 // Fonction pour créer un rendez-vous
 export const createAppointment = async (req, res) => {
   try {
@@ -10,6 +11,7 @@ export const createAppointment = async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "Utilisateur non authentifié" });
     }
+   
     const existingAppointment = await Appointment.findOne({
       date,
       hour,
@@ -42,7 +44,9 @@ export const createAppointment = async (req, res) => {
 export const getAllAppointments = async (req, res) => {
   
   try{
-    const appointments = await Appointment.find();
+    const appointments = await Appointment.find()
+    .populate("patient","firstName lastName email phone")
+    .exec();
     res.status(200).json({message:"appointments retrieved successfully",appointments});
   
   }catch(error){
@@ -51,14 +55,27 @@ export const getAllAppointments = async (req, res) => {
   }
 };
 export const getPatientAppointments = async (req, res) => {
+  // try {
+  //   console.log("Patient ID:", req.user._id);  // Log the patient ID to check if it's correct
+  //   const appointments = await Appointment.find({ patient: req.user._id });
+  //   if (appointments.length === 0) {
+  //     return res.status(404).json({ message: "No appointments found" });
+  //   }
+  //   res.status(200).json({ message: "Appointments retrieved successfully", appointments });
+  // } catch (error) {
+  //   console.error("Error retrieving appointments", error);
+  //   res.status(500).json({ message: "Error retrieving appointments", error });
+  // }
   try {
-    const appointments = await Appointment.find({ patient: req._id });
-    res.status(200).json({ message: "Appointments retrieved successfully", appointments });
+    console.log("patient id from request:",req.user._id);
+    const appointments = await Appointment.find({ patient: req.user._id }).populate("patient", "name email");
+    res.status(200).json(appointments);
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving appointments", error });
-    console.error("Error retrieving appointments", error);  
-}
+    console.error("Error fetching appointments:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
+
 export const updateAppointment = async (req, res) => {
   try {
     const { appointmentId } = req.params;

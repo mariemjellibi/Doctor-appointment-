@@ -7,7 +7,8 @@ const generateTokenAndSetCookie = (userId, res) => {
     httpOnly: true, //to prevent the client side javascript from accessing the cookie
     secure: true,
     maxAge: 30 * 24 * 60 * 60 * 1000,
-    sameSite: "strict",
+    secure: process.env.NODE_ENV === 'production', // Only send cookie over HTTPS in production
+  sameSite: 'None', // Required for cross-origin cookies
   });
   return token;
 };
