@@ -7,7 +7,7 @@ import userRoutes from "./routes/userRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 dotenv.config();
 const corsOptions = {
-  origin: 'http://localhost:5174', // Your frontend URL
+  origin: 'http://localhost:5173', // Your frontend URL
   credentials: true, // Allow cookies to be sent with requests
 
 };

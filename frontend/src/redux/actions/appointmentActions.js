@@ -86,7 +86,10 @@ export const editAppointment = (id, updatedData) => async (dispatch) => {
 // Action for deleting an appointment
 export const removeAppointment = (id) => async (dispatch) => {
   try {
-    await fetch(`/api/appointments/${id}`, { method: "DELETE" });
+    console.log("here i am in the delete action");
+    const token =localStorage.getItem("token");
+    console.log("this is the token",token);
+    await fetch(`http://localhost:5005/api/appointments/${id}`, { method: "DELETE" , headers: { "Content-Type": "application/json",  Authorization: token ? `Bearer ${token}` : "", },});
     dispatch(deleteAppointment({ id }));
   } catch (error) {
     console.error("Error deleting appointment:", error);

@@ -106,3 +106,16 @@ export const updateAppointment = async (req, res) => {
     rs.status(500).json({message:"server error"});
   }
 }
+export const deleteAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const appointment = await Appointment.findByIdAndDelete(appointmentId);
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+    res.status(200).json({ message: "Appointment deleted successfully" });  
+  } catch (error) { 
+    console.error("Error deleting appointment:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+}

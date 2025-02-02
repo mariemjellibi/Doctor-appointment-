@@ -1,77 +1,139 @@
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux"; // Import useSelector to get token from Redux store
+import { useEffect, useState, useCallback } from "react";
+import { useSelector } from "react-redux";
+import { CheckCircle, XCircle, RefreshCw } from "lucide-react"; // Icons for better visuals
 
 const DoctorDashboard = () => {
-  const [appointments, setAppointments] = useState([]); // Store appointments data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  const token = useSelector((state) => state.auth.token);
 
-  const token = useSelector((state) => state.auth.token); // Get the token from Redux store
+  // Fetch Appointments Function
+  const fetchAppointments = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("http://localhost:5005/api/appointments/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch appointments");
+
+      const data = await response.json();
+      if (Array.isArray(data.appointments)) {
+        setAppointments(data.appointments);
+      } else {
+        throw new Error("Appointments data is not an array");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
-    // Fetching the appointments data
-    const fetchAppointments = async () => {
-      try {
-        const response = await fetch("http://localhost:5005/api/appointments/all", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Pass the token here
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch appointments");
-        }
-
-        const data = await response.json();
-console.log("data.appointments",data.appointments);
-        // Ensure data is an array before setting the state
-        if (Array.isArray(data.appointments)) {
-          setAppointments(data.appointments);
-        } else {
-          throw new Error("Appointments data is not an array");
-        }
-      } catch (err) {
-        setError(err.message); // Set the error message if the fetch fails
-      } finally {
-        setLoading(false); // Set loading to false after fetching
-      }
-    };
-
     if (token) {
       fetchAppointments();
     } else {
       setError("No token available.");
       setLoading(false);
     }
-  }, [token]); // Make sure the effect runs when the token changes
+  }, [token, fetchAppointments]);
 
-  if (loading) {
-    return <div>Loading appointments...</div>;
-  }
+  // Mock function for changing status
+  const handleStatusChange = (id) => {
+    setAppointments(appointments.map(appointment => 
+      appointment._id === id 
+        ? { ...appointment, status: !appointment.status } 
+        : appointment
+    ));
+  };
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  // Mock function for deleting appointment
+  const handleDelete = (id) => {
+    setAppointments(appointments.filter((appointment) => appointment._id !== id));
+  };
 
   return (
-    <div>
-      <h2>Appointments</h2>
-      <ul>
+    <div className="max-w-4xl mx-auto p-6">
+      <h2 className="text-3xl font-semibold text-center text-gray-800 dark:text-white mb-6">
+        Appointments
+      </h2>
+
+      {/* Refresh Button */}
+      <button 
+        onClick={fetchAppointments} 
+        className="bg-blue-500 text-white py-2 px-4 rounded-md mb-6 hover:bg-blue-600 transition flex items-center"
+      >
+        <RefreshCw className="w-5 h-5 mr-2" />
+        Refresh
+      </button>
+
+      {/* Loading State */}
+      {loading && <p className="text-gray-500 text-center">Loading appointments...</p>}
+
+      {/* Error Handling with Retry Button */}
+      {error && (
+        <div className="text-red-500 text-center">
+          <p>{error}</p>
+          <button 
+            onClick={fetchAppointments} 
+            className="bg-red-500 text-white py-2 px-4 rounded-md mt-2 hover:bg-red-600 transition"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* No Appointments Message */}
+      {!loading && !error && appointments.length === 0 && (
+        <p className="text-gray-500 text-center">No appointments found.</p>
+      )}
+
+      {/* Appointments List */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {appointments.map((appointment) => (
-          <li key={appointment._id}>
-            <h3>Appointment Details:</h3>
-            <p><strong>Patient:</strong> {appointment.patient.firstName} {appointment.patient.lastName}</p>
-            <p><strong>Email:</strong> {appointment.patient.email}</p>
-            <p><strong>Phone:</strong> {appointment.patient.phone}</p>
-            <p><strong>Date:</strong> {new Date(appointment.date).toLocaleDateString()}</p>
-            <p><strong>Time:</strong> {appointment.hour}</p>
-            <p><strong>Status:</strong> {appointment.status ? "Confirmed" : "Pending"}</p>
-            <p><strong>Description:</strong> {appointment.description}</p>
-          </li>
+          <div key={appointment._id} className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 border hover:shadow-lg transition duration-300">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Appointment Details</h3>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Patient:</strong> {appointment.patient.firstName} {appointment.patient.lastName}</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Email:</strong> {appointment.patient.email}</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Phone:</strong> {appointment.patient.phone}</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Date:</strong> {new Date(appointment.date).toLocaleDateString()}</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Time:</strong> {appointment.hour}</p>
+            
+            <div className="flex items-center">
+              <p className="text-gray-600 dark:text-gray-300"><strong>Status:</strong></p>
+              <span className={`ml-2 px-2 py-1 rounded text-white ${appointment.status ? "bg-green-500" : "bg-yellow-500"}`}>
+                {appointment.status ? "Confirmed" : "Pending"}
+              </span>
+            </div>
+
+            <div className="mt-4 flex justify-between">
+              {/* Toggle Status */}
+              <button
+                onClick={() => handleStatusChange(appointment._id)}
+                className={`text-white py-1 px-3 rounded-md ${appointment.status ? "bg-yellow-500 hover:bg-yellow-600" : "bg-green-500 hover:bg-green-600"} transition`}
+              >
+                {appointment.status ? "Mark as Pending" : "Mark as Confirmed"}
+              </button>
+
+              {/* Delete Appointment */}
+              <button
+                onClick={() => handleDelete(appointment._id)}
+                className="text-red-500 hover:text-red-600 transition"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
