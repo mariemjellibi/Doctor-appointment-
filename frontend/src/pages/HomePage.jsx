@@ -7,6 +7,7 @@ import Testimonials from "../components/Testimonials";
 import Footer from "../components/Footer";
 
 const HomePage = () => {
+  
   return (
     <div>
       <NavBar />

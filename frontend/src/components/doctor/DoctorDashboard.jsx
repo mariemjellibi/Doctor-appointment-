@@ -106,6 +106,7 @@ const DoctorDashboard = () => {
             <p className="text-gray-600 dark:text-gray-300"><strong>Phone:</strong> {appointment.patient.phone}</p>
             <p className="text-gray-600 dark:text-gray-300"><strong>Date:</strong> {new Date(appointment.date).toLocaleDateString()}</p>
             <p className="text-gray-600 dark:text-gray-300"><strong>Time:</strong> {appointment.hour}</p>
+            <p className="text-gray-600 dark:text-gray-300"><strong>Description:</strong> {appointment.description}</p>
             
             <div className="flex items-center">
               <p className="text-gray-600 dark:text-gray-300"><strong>Status:</strong></p>

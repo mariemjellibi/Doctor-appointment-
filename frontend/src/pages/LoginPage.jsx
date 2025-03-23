@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginUser, registerUser } from "../redux/actions/authActions";
 import { useForm } from "react-hook-form";
+import { GoogleLogin } from "@react-oauth/google"; // Import GoogleLogin
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(false); // Toggle between Sign Up and Login
@@ -67,17 +68,56 @@ const LoginPage = () => {
     }
   };
 
+  const handleGoogleLogin = async (response) => {
+    if (response.error) {
+      console.error("Google Login Error", response.error);
+    } else {
+      console.log("Google Login Success", response);
+  
+      // Get the Google token from the response
+      const googleToken = response.credential;
+  
+      if (googleToken) {
+        try {
+          // Send the token to your backend to verify and get user data
+          const res = await fetch("https://localhost:5005/api/auth/google", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: googleToken }),
+          });
+  
+          const user = await res.json(); // Assuming the backend returns a user object
+  
+          if (user && user._id) {
+            // After receiving the user data from the backend, navigate to the user's profile
+            navigate(`/profile/${user._id}`);
+          } else {
+            console.error("User ID not found after Google login.");
+          }
+        } catch (error) {
+          console.error("Error during Google token verification:", error);
+        }
+      } else {
+        console.error("No Google token received.");
+      }
+    }
+  };
+  
+  
+
   return (
-    <div className="max-w-lg mx-auto p-8 bg-gradient-to-r from-[#FBFBFB] via-[#E8F9FF] to-[#C4D9FF] shadow-lg rounded-lg">
+    <div className="max-w-lg mx-auto mt-30 p-8 bg-gradient-to-r from-[#569fe4] via-[#8094fb] to-[#a0c1ff] rounded-lg">
       <div className="text-center mb-6">
-        <h1 className="text-3xl font-semibold text-[#C5BAFF]">
+        <h1 className="text-3xl font-semibold text-[#000000]">
           {isLogin ? "Log In" : "Sign Up"}
         </h1>
         <p className="text-sm text-gray-500 mt-2">
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-[#C5BAFF] hover:text-[#C4D9FF] font-semibold"
+            className="text-[#000000] hover:text-[#C4D9FF] font-semibold"
           >
             {isLogin ? "Sign Up" : "Log In"}
           </button>
@@ -115,37 +155,30 @@ const LoginPage = () => {
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 gap-6">
+            {/* Registration Form Fields */}
             <div>
               <label className="text-gray-700 text-sm mb-2 block">First Name</label>
               <input
                 {...register("firstName", { required: "First Name is required" })}
-                type="text"
                 className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
-                placeholder="Enter first name"
+                placeholder="Enter your first name"
               />
-              {errors.firstName && (
-                <span className="text-red-500 text-sm">{errors.firstName.message}</span>
-              )}
             </div>
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Last Name</label>
               <input
                 {...register("lastName", { required: "Last Name is required" })}
-                type="text"
                 className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
-                placeholder="Enter last name"
+                placeholder="Enter your last name"
               />
-              {errors.lastName && (
-                <span className="text-red-500 text-sm">{errors.lastName.message}</span>
-              )}
             </div>
-            <div>
+            <div className="col-span-2">
               <label className="text-gray-700 text-sm mb-2 block">Email</label>
               <input
                 {...register("email", { required: "Email is required" })}
                 type="email"
                 className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
-                placeholder="Enter email"
+                placeholder="Enter your email"
               />
               {errors.email && (
                 <span className="text-red-500 text-sm">{errors.email.message}</span>
@@ -154,14 +187,10 @@ const LoginPage = () => {
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Phone</label>
               <input
-                {...register("phone", { required: "Phone is required" })}
-                type="tel"
+                {...register("phone", { required: "Phone number is required" })}
                 className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
-                placeholder="Enter mobile number"
+                placeholder="Enter your phone number"
               />
-              {errors.phone && (
-                <span className="text-red-500 text-sm">{errors.phone.message}</span>
-              )}
             </div>
             <div>
               <label className="text-gray-700 text-sm mb-2 block">Password</label>
@@ -169,7 +198,7 @@ const LoginPage = () => {
                 {...register("password", { required: "Password is required" })}
                 type="password"
                 className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
-                placeholder="Enter password"
+                placeholder="Enter your password"
               />
               {errors.password && (
                 <span className="text-red-500 text-sm">{errors.password.message}</span>
@@ -181,7 +210,7 @@ const LoginPage = () => {
                 {...register("cpassword", { required: "Confirm Password is required" })}
                 type="password"
                 className="w-full bg-gray-100 text-gray-800 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#C4D9FF]"
-                placeholder="Confirm password"
+                placeholder="Confirm your password"
               />
               {errors.cpassword && (
                 <span className="text-red-500 text-sm">{errors.cpassword.message}</span>
@@ -200,6 +229,17 @@ const LoginPage = () => {
           </button>
         </div>
       </form>
+
+      {/* Google Login Button */}
+      <div className="mt-6">
+        <GoogleLogin
+          clientId="878359082505-hs6qbfbvf1hcqa0dbn3md6n1cvqn9hjv.apps.googleusercontent.com" // Replace with your Google client ID
+          buttonText="Login with Google"
+          onSuccess={handleGoogleLogin}
+          onFailure={handleGoogleLogin}
+          cookiePolicy={"single_host_origin"}
+        />
+      </div>
     </div>
   );
 };
