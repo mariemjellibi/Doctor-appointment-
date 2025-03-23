@@ -21,8 +21,6 @@ const appointmentSchema = new mongoose.Schema({
         type: String
     }
     
-},{
-    timestamps: true
 }
 )
 const Appointment= mongoose.model('Appointment',appointmentSchema);

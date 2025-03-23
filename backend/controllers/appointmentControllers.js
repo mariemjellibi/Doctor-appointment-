@@ -1,7 +1,7 @@
 import Appointment from "../models/Appointment.js";
 import User from "../models/User.js";
 import mongoose from "mongoose";
-
+import Notification from "../models/Notification.js";
 // Fonction pour créer un rendez-vous
 export const createAppointment = async (req, res) => {
   try {
@@ -27,10 +27,20 @@ export const createAppointment = async (req, res) => {
       description,
       status: false, // Par défaut, le statut est "false" (non confirmé)
     });
-
+    const notification= new Notification({
+      message:`youre appointment on ${date} at ${hour}`,
+      recipientEmail:req.user.email,
+      appointment:newAppointment._id
+    });
+await notification.save();
     // Enregistrer dans la base de données
     const savedAppointment = await newAppointment.save();
+// isObjectIdOrHexString.emit("appointmentBooked",{message:`youre appointment on ${date} at ${hour}`,
+//   patientId,
+//   date,
+//   hour,
 
+  // })
     // Répondre avec les informations du rendez-vous créé
     res.status(201).json({
       message: "Rendez-vous créé avec succès",
