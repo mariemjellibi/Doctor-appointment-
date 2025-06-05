@@ -35,68 +35,64 @@ const PatientProfile = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-white shadow-2xl rounded-3xl transform transition-all duration-300 hover:shadow-3xl">
-      <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center">Patient Profile</h3>
-      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
-            <input
-              type="text"
-              {...register("firstName", { required: "First name is required" })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            />
-            {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
-            <input
-              type="text"
-              {...register("lastName", { required: "Last name is required" })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            />
-            {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>}
-          </div>
-        </div>
-
+    <div className="max-w-3xl mx-auto p-10 bg-gradient-to-br from-blue-50 to-white rounded-3xl shadow-2xl">
+    <h3 className="text-4xl font-bold text-blue-900 mb-10 text-center">Patient Profile</h3>
+    <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+          <label className="block text-gray-700 text-md font-medium mb-1">First Name</label>
           <input
-            type="email"
-            {...register("email", { required: "Email is required", pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" } })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            {...register("firstName", { required: "First name is required" })}
+            className="w-full border border-gray-300 px-4 py-3 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+          {errors.firstName && <p className="text-sm text-red-600">{errors.firstName.message}</p>}
         </div>
-
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+          <label className="block text-gray-700 text-md font-medium mb-1">Last Name</label>
           <input
-            type="text"
-            {...register("phone", { required: "Phone number is required" })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            {...register("lastName", { required: "Last name is required" })}
+            className="w-full border border-gray-300 px-4 py-3 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
+          {errors.lastName && <p className="text-sm text-red-600">{errors.lastName.message}</p>}
         </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-          <input
-            type="password"
-            {...register("password")}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
-        >
-          Save
-        </button>
-      </form>
-    </div>
+      </div>
+  
+      <div>
+        <label className="block text-gray-700 text-md font-medium mb-1">Email</label>
+        <input
+          {...register("email", { required: "Email is required", pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" } })}
+          className="w-full border border-gray-300 px-4 py-3 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
+      </div>
+  
+      <div>
+        <label className="block text-gray-700 text-md font-medium mb-1">Phone</label>
+        <input
+          {...register("phone", { required: "Phone number is required" })}
+          className="w-full border border-gray-300 px-4 py-3 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        {errors.phone && <p className="text-sm text-red-600">{errors.phone.message}</p>}
+      </div>
+  
+      <div>
+        <label className="block text-gray-700 text-md font-medium mb-1">Password</label>
+        <input
+          type="password"
+          {...register("password")}
+          className="w-full border border-gray-300 px-4 py-3 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+  
+      <button
+        type="submit"
+        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl hover:from-indigo-600 transition-all duration-300"
+      >
+        Save Changes
+      </button>
+    </form>
+  </div>
+  
   );
 };
 

@@ -26,53 +26,51 @@ const PatientDashboard = () => {
   }, [dispatch]);
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold text-center text-gray-800 dark:text-white mb-6">
-        Your Appointments
-      </h2>
-
-      <div className="space-y-4">
-        {appointments.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-300 text-center">
-            No appointments found.
-          </p>
-        ) : (
-          appointments.map((appointment) => (
-            <div
-              key={appointment._id}
-              className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-5 flex items-center justify-between border border-gray-200 dark:border-gray-700"
-            >
-              <div>
-                <p className="flex items-center text-gray-700 dark:text-gray-300">
-                  <CalendarDays className="w-5 h-5 mr-2 text-blue-500" />
-                  {appointment.date}
-                </p>
-                <p className="flex items-center text-gray-700 dark:text-gray-300">
-                  <Clock className="w-5 h-5 mr-2 text-green-500" />
-                  {appointment.hour}
-                </p>
-              </div>
-
-              <div className="flex items-center">
-                {appointment.status === "Confirmed" ? (
-                  <CheckCircle className="w-6 h-6 text-green-500" />
-                ) : (
-                  <XCircle onClick={() => remove(appointment._id)} className="w-6 h-6 text-red-500 cursor-pointer" />
-                )}
-                <button 
-                  onClick={() => setSelectedAppointment(appointment)} 
-                  className="shadow-lg bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">
-                  Details
-                </button>
-              </div>
+    <div className="max-w-4xl mx-auto p-8 bg-white shadow-2xl rounded-3xl">
+    <h2 className="text-3xl font-bold text-center text-blue-800 mb-8">Your Appointments</h2>
+    <div className="space-y-5">
+      {appointments.length === 0 ? (
+        <p className="text-center text-gray-500">You have no appointments.</p>
+      ) : (
+        appointments.map((appointment) => (
+          <div
+            key={appointment._id}
+            className="flex items-center justify-between bg-blue-50 border-l-4 border-blue-600 p-6 rounded-xl shadow-md"
+          >
+            <div>
+              <p className="text-lg font-medium text-blue-900 flex items-center">
+                <CalendarDays className="w-5 h-5 mr-2 text-blue-500" />
+                {appointment.date}
+              </p>
+              <p className="text-md text-gray-700 flex items-center mt-1">
+                <Clock className="w-5 h-5 mr-2 text-green-500" />
+                {appointment.hour}
+              </p>
             </div>
-          ))
-        )}
-      </div>
-
-      {/* Show DetailsCard if an appointment is selected */}
-      {selectedAppointment && <DetailsCard data={selectedAppointment} onClose={() => setSelectedAppointment(null)} />}
+            <div className="flex gap-3 items-center">
+              {appointment.status === "Confirmed" ? (
+                <CheckCircle className="w-6 h-6 text-green-500" />
+              ) : (
+                <XCircle onClick={() => remove(appointment._id)} className="w-6 h-6 text-red-500 cursor-pointer hover:scale-110 transition" />
+              )}
+              <button
+                onClick={() => setSelectedAppointment(appointment)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-all"
+              >
+                Details
+              </button>
+            </div>
+          </div>
+        ))
+      )}
     </div>
+    {selectedAppointment && (
+      <div className="mt-6">
+        <DetailsCard data={selectedAppointment} onClose={() => setSelectedAppointment(null)} />
+      </div>
+    )}
+  </div>
+  
   );
 };
 
