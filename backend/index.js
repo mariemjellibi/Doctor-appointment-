@@ -10,8 +10,8 @@ import userRoutes from "./routes/userRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js"
 import session from "express-session";
-import passport from "./utils/passport.js";
-import authRoutes from "./routes/authRoutes.js";
+// import passport from "./utils/passport.js";
+// import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 const corsOptions = {
   origin: 'http://localhost:5173', // Your frontend URL
@@ -54,9 +54,9 @@ app.use(session({
   saveUninitialized: false,
 }))
 // Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
-app.use("/api/auth",authRoutes)
+// app.use(passport.initialize());
+// app.use(passport.session());
+// app.use("/api/auth",authRoutes)
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
