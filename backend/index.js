@@ -8,16 +8,15 @@ import sendAppointmentReminder from "./utils/sendReminders.js";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
-import notificationRoutes from "./routes/notificationRoutes.js"
+import notificationRoutes from "./routes/notificationRoutes.js";
 import session from "express-session";
 // import passport from "./utils/passport.js";
 // import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 const corsOptions = {
-  origin: 'http://localhost:5173', // Your frontend URL
+  origin: "http://localhost:5173", // Your frontend URL
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   credentials: true, // Allow cookies to be sent with requests
-
 };
 const app = express();
 
@@ -42,17 +41,28 @@ connectDB()
 //routes
 app.use("/api/users", userRoutes);
 app.use("/api/appointments", appointmentRoutes);
-app.use("/api/notifications",notificationRoutes);
-app.use("/api/test",test);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/test", test);
 cron.schedule("0 8 * * *", async () => {
   console.log("Running cron job");
   await sendAppointmentReminder();
 });
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-}))
+//test the mail sender and it works yaaay 
+// (async () => {
+//   try {
+//     await sendAppointmentReminder();
+//     console.log("Reminder function ran successfully");
+//   } catch (err) {
+//     console.error("Error running reminder function manually:", err);
+//   }
+// })();
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 // Initialize Passport
 // app.use(passport.initialize());
 // app.use(passport.session());

@@ -98,19 +98,72 @@ const DoctorDashboard = () => {
     pending: filteredAppointments.filter(apt => !apt.status).length,
     today: todayAppointments.length
   };
+  const updateAppointmentStatus = async (appointmentId, status) => {
+  try {
+    const response = await fetch(`/api/appointments/${appointmentId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status }),
+    });
 
-  // Handle status change (from first code - local state update with mock functionality)
-  const handleStatusChange = (id) => {
-    setAppointments(appointments.map(appointment => 
-      appointment._id === id 
-        ? { ...appointment, status: !appointment.status } 
-        : appointment
-    ));
-  };
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update status');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+};
+const handleStatusChange = async (id) => {
+  // Save current state for potential rollback
+  const originalAppointments = [...appointments];
+  
+  // Optimistic UI update
+  const updatedAppointments = appointments.map(appointment => 
+    appointment._id === id 
+      ? { ...appointment, status: !appointment.status } 
+      : appointment
+  );
+  setAppointments(updatedAppointments);
+
+  try {
+    // Send update to backend
+    const response = await updateAppointmentStatus(id, !originalAppointments.find(a => a._id === id).status);
+    
+    // Optional: Sync with server response
+    setAppointments(prev => 
+      prev.map(app => 
+        app._id === id ? response.appointment : app
+      )
+    );
+  } catch (error) {
+    // Revert on error
+    setAppointments(originalAppointments);
+    alert(`Update failed: ${error.message}`);
+  }
+};
 
   // Handle deletion (from first code - local state update with mock functionality)
-  const handleDelete = (id) => {
-    setAppointments(appointments.filter((appointment) => appointment._id !== id));
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5005/api/appointments/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to delete appointment");
+
+      setAppointments(appointments.filter((appointment) => appointment._id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (

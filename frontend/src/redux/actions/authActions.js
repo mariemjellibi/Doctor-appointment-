@@ -100,3 +100,35 @@ export const updateProfile = (updatedData) => async (dispatch) => {
     throw error;
   }
 };
+export const getUserProfile = () => async (dispatch) => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("No token found, user is not authenticated.");
+  }
+
+  try {
+    const response = await fetch("http://localhost:5005/api/users/profile", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${token}`,
+      },  
+      credentials: "include", // Ensure cookies are sent
+    }); 
+
+    if (!response.ok) {
+      
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch user profile");     
+
+    }
+    const data = await response.json();
+    console.log("User profile data:", data);
+
+    dispatch(login(data));
+    return data;
+  } catch (error) {
+    console.error("Error fetching user profile:", error.message);
+    throw error;
+  }
+};

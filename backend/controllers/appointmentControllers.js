@@ -129,3 +129,43 @@ export const deleteAppointment = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 }
+export const changeStatus = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { status } = req.body;
+    
+    // Validate input
+    if (typeof status !== 'boolean') {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { status },
+      { new: true, runValidators: true }
+    ).populate('patient', 'firstName lastName email phone');
+
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment not found" });
+    }
+
+    // Return updated appointment with patient details
+    res.status(200).json({
+      message: "Appointment status updated successfully",
+      appointment
+    });
+    
+  } catch (error) {
+    console.error("Error changing appointment status:", error.message);
+    
+    // Handle specific Mongoose errors
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: "Invalid appointment ID format" });
+    }
+    
+    res.status(500).json({ 
+      message: "Server error",
+      error: error.message 
+    });
+  }
+};
