@@ -7,7 +7,7 @@ import Testimonials from "../components/Testimonials";
 import Footer from "../components/Footer";
 import { motion } from "framer-motion";
 import { fadeIn } from "../framerMotion/variants";
-
+import AIAgent from "../components/AIAgent";
 const HomePage = () => {
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
@@ -88,6 +88,7 @@ const HomePage = () => {
           <Footer />
         </motion.section>
       </div>
+      <AIAgent />
     </div>
   );
 };
